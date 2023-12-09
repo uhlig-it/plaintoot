@@ -44,10 +44,16 @@ func (s *Server) WithBlurb(blurb string) *Server {
 
 func (s *Server) Start(addr string) error {
 	e := echo.New()
+	e.HideBanner = true
 
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
-	e.HideBanner = true
+	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(ctx echo.Context) error {
+			ctx.Response().Header().Set("Server", plaintoot.VersionStringShort())
+			return next(ctx)
+		}
+	})
 
 	e.GET("/", s.Root)
 	e.POST("/", s.Lookup)
@@ -74,16 +80,12 @@ func (s *Server) Start(addr string) error {
 }
 
 func (s *Server) Root(ctx echo.Context) error {
-	ctx.Response().Header().Add("Server", plaintoot.VersionStringShort())
-
 	// TODO Serve form with field `url`
 
 	return ctx.String(http.StatusOK, s.blurb)
 }
 
 func (s *Server) Lookup(ctx echo.Context) error {
-	ctx.Response().Header().Add("Server", plaintoot.VersionStringShort())
-
 	url, err := url.Parse(ctx.FormValue("url"))
 
 	if err != nil {
@@ -101,7 +103,6 @@ func (s *Server) Lookup(ctx echo.Context) error {
 
 // The kubelet uses liveness probes to know when to restart a container
 func (s *Server) Liveness(ctx echo.Context) error {
-	ctx.Response().Header().Add("Server", plaintoot.VersionStringShort())
 	ctx.Response().Header().Add("X-Uptime", time.Since(s.startedAt).Round(time.Second).String())
 
 	if s.maxUptime == 0 || time.Since(s.startedAt) < s.maxUptime {
@@ -113,8 +114,6 @@ func (s *Server) Liveness(ctx echo.Context) error {
 
 // The kubelet uses readiness probes to know when a container is ready to start accepting traffic
 func (s *Server) Readiness(ctx echo.Context) error {
-	ctx.Response().Header().Add("Server", plaintoot.VersionStringShort())
-
 	u, err := url.Parse("https://chaos.social/@nixCraft@mastodon.social/111108182085516402")
 
 	if err != nil {
@@ -131,7 +130,5 @@ func (s *Server) Readiness(ctx echo.Context) error {
 }
 
 func (s *Server) Version(ctx echo.Context) error {
-	ctx.Response().Header().Add("Server", plaintoot.VersionStringShort())
-
 	return ctx.String(http.StatusOK, plaintoot.VersionString())
 }
