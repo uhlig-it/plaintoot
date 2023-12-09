@@ -10,6 +10,7 @@ import (
 func main() {
 	rootCmd := cmd.RootCmd
 
+	rootCmd.AddCommand(cmd.ServeCmd)
 	rootCmd.AddCommand(cmd.PrintCmd)
 	rootCmd.AddCommand(cmd.VersionCmd)
 

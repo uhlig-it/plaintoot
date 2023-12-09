@@ -10,13 +10,6 @@ builds:
       -X github.com/uhlig-it/plaintoot/plaintoot.version={{.Version}}
       -X github.com/uhlig-it/plaintoot/plaintoot.commit={{.Commit}}
       -X github.com/uhlig-it/plaintoot/plaintoot.date={{.Date}}
-archives:
-  - replacements:
-      darwin: Darwin
-      linux: Linux
-      amd64: x86_64
-      arm: RaspberryPi
-      windows: Windows
 checksum: { name_template: "checksums.txt" }
 snapshot: { name_template: "{{ .Tag }}-next" }
 release:
