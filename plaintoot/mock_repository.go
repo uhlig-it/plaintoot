@@ -5,24 +5,13 @@ import (
 	"net/url"
 )
 
-type MockRepository struct {
-	uri  *url.URL
-	text string
-}
+type MockRepository map[string]string
 
-func NewMockRepository(u, t string) (*MockRepository, error) {
-	uri, err := url.Parse(u)
+func (r MockRepository) Lookup(uri *url.URL) (*Post, error) {
+	text, found := r[uri.String()]
 
-	if err != nil {
-		return nil, err
-	}
-
-	return &MockRepository{uri: uri, text: t}, nil
-}
-
-func (r *MockRepository) Lookup(uri *url.URL) (*Post, error) {
-	if uri.String() == r.uri.String() {
-		return &Post{Text: "example.com", User: "foo", Host: "example.net"}, nil
+	if found {
+		return &Post{Text: text, User: uri.User.String(), Host: uri.Host}, nil
 	} else {
 		return nil, errors.New("no post found with that URL")
 	}

@@ -27,8 +27,9 @@ var _ = Describe("http-server", func() {
 		e = echo.New()
 		response = httptest.NewRecorder()
 
-		r, err := plaintoot.NewMockRepository("https://example.com/@foo@example.net/42", "Hello World")
-		Expect(err).ToNot(HaveOccurred())
+		r := plaintoot.MockRepository{}
+		r["https://example.com/@foo@example.net/42"] = "Hello World"
+		r["https://chaos.social/@nixCraft@mastodon.social/111108182085516402"] = ""
 
 		server = *ptServer.NewServer(r)
 	})
@@ -74,7 +75,7 @@ var _ = Describe("http-server", func() {
 			Expect(response.Code).To(Equal(200))
 		})
 
-		Context("the response body", func() {
+		Context("response body", func() {
 			var body *bytes.Buffer
 
 			JustBeforeEach(func() {
@@ -111,6 +112,18 @@ var _ = Describe("http-server", func() {
 		It("succeeds", func() {
 			Expect(response.Code).To(Equal(200))
 		})
+
+		Context("response body", func() {
+			var body *bytes.Buffer
+
+			JustBeforeEach(func() {
+				body = response.Body
+			})
+
+			It("has the expected text", func() {
+				Expect(body).To(ContainSubstring("Hello World"))
+			})
+		})
 	})
 
 	Context("GET /liveness", func() {
@@ -127,8 +140,7 @@ var _ = Describe("http-server", func() {
 		})
 	})
 
-	// TODO The mock repo doesn't know about the default lookup that we do for readiness
-	PContext("GET /readiness", func() {
+	Context("GET /readiness", func() {
 		BeforeEach(func() {
 			request = httptest.NewRequest(http.MethodGet, "/readiness", nil)
 		})
