@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"slices"
+	"strings"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -80,9 +82,45 @@ func (s *Server) Start(addr string) error {
 }
 
 func (s *Server) Root(ctx echo.Context) error {
-	// TODO Serve form with field `url`
+	if acceptsAnyOfContentType(ctx, echo.MIMETextHTML, echo.MIMETextHTMLCharsetUTF8) {
+		return ctx.HTML(http.StatusOK, `
+<!DOCTYPE html lang=en>
+<head><title>plaintoot</title></head>
+<body>
+<p>Provides a plaintext representation of a Mastodon post ("toot").</p>
+<form method=post>
+	<p><label for=url>Enter a URL:</label></p>
+	<p>
+		<input type=text id=url name=url required minlength=12 size=80 />
+		<input type="submit" />
+	</p>
+</form>
+<p>
+If you prefer the command line, use this example:
+<pre>
+curl http://localhost:8080 -d url=https://example.com/@someone@example.net/1234567890
+</pre>
+and replace <code>http://localhost:8080</code> with the real hostname and port.
+</p>
+</body>
+		`)
+	}
 
 	return ctx.String(http.StatusOK, s.blurb)
+}
+
+func acceptsAnyOfContentType(ctx echo.Context, mimetypes ...string) bool {
+	for _, acceptedHeader := range ctx.Request().Header["Accept"] {
+		acceptedContentTypes := strings.Split(acceptedHeader, ",")
+
+		for _, mimetype := range mimetypes {
+			if slices.Contains(acceptedContentTypes, mimetype) {
+				return true
+			}
+		}
+	}
+
+	return false
 }
 
 func (s *Server) Lookup(ctx echo.Context) error {
