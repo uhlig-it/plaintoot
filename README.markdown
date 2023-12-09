@@ -28,6 +28,15 @@ Install [watchexec](https://github.com/watchexec/watchexec#install) and start th
 $ STARTUP_DELAY=10s MAX_UPTIME=20s watchexec --restart go run . serve
 ```
 
+The docker image can be built and pushed with
+
+```command
+$ docker buildx build \
+  --push \
+  --platform linux/arm/v7,linux/arm64/v8,linux/amd64 \
+  --tag suhlig/plaintoot
+```
+
 # Bonus
 
 This application is intended for use in my course "[Web Services](https://ws.uhlig.it/)" at [DHBW](https://www.ravensburg.dhbw.de/studienangebot/bachelor-studiengaenge/informatik). For this purpose, it has some endpoints that showcase Kubernetes' [liveness and readiness probes](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/):
