@@ -20,6 +20,14 @@ $ docker run --interactive --tty --rm suhlig/plaintoot
 
 `plaintoot serve` serves a plain-text representation of a single post via HTTP. It will start an HTTP server listening on `$PORT` (defaults to `8080`) and provide the same functionality as `print` (see above).
 
+With docker, this would be:
+
+```command
+$ docker run --interactive --tty --rm --env PORT=8888 --publish 8090:8888 suhlig/plaintoot plaintoot serve
+```
+
+where we tell plaintoot to bind to port `8888` and then tell Docker to publish on port `8090` what's listening on port `8888` internally.
+
 # Develop
 
 Install [watchexec](https://github.com/watchexec/watchexec#install) and start the server like this in order to reload the server process on any file changes:
